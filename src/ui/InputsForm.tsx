@@ -57,14 +57,8 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
         value={value[k] as number}
         onChange={(e) => {
           const parsed = parseFloat(e.target.value);
-          const finalValue = isNaN(parsed) ? min : Math.max(parsed, min);
-          update(k, finalValue);
-        }}
-        onBlur={(e) => {
-          const parsed = parseFloat(e.target.value);
-          if (isNaN(parsed)) {
-            update(k, min);
-          }
+          const finalValue = isNaN(parsed) ? '' : Math.max(parsed, min);
+          update(k, finalValue as any);
         }}
         className="border rounded px-2 py-1"
       />
