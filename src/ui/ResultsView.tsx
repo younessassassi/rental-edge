@@ -15,6 +15,10 @@ export const ResultsView: React.FC<{ analysis: AnalysisResult }> = ({ analysis }
       cumFinCF: financed.yearly.slice(0, idx+1).reduce((a,b)=>a+b.afterTaxCashFlow,0),
     };
   });
+
+  const formatCurrencyAxis = (value: number) => `$${(value / 1000).toFixed(0)}k`;
+  const formatCurrencyTooltip = (value: number) => `$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
   return (
     <div className="space-y-6">
       {financed.yearly.some(y=>y.afterTaxCashFlow < 0) && (
@@ -32,8 +36,8 @@ export const ResultsView: React.FC<{ analysis: AnalysisResult }> = ({ analysis }
         <ResponsiveContainer width="100%" height="85%">
           <LineChart data={chartData}>
             <XAxis dataKey="year" />
-            <YAxis />
-            <Tooltip />
+            <YAxis tickFormatter={formatCurrencyAxis} />
+            <Tooltip formatter={(value: number) => formatCurrencyTooltip(value)} />
             <Legend />
             <Line type="monotone" dataKey="cumCashCF" stroke="#16a34a" name="Cumulative Cash CF" />
             <Line type="monotone" dataKey="cumFinCF" stroke="#2563eb" name="Cumulative Fin CF" />
@@ -72,52 +76,56 @@ const SummaryCard: React.FC<{ title: string; irr: number | null; total: number; 
   );
 };
 
-const TableView: React.FC<{ cash: YearResultBase[]; fin: YearResultFinanced[]; }> = ({ cash, fin }) => (
-  <div className="overflow-auto bg-white rounded shadow">
-  <table className="min-w-full text-xs">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="p-2 text-left">Year</th>
-          <th className="p-2 text-right">Rent</th>
-          <th className="p-2 text-right">Expenses</th>
-          <th className="p-2 text-right">NOI Cash</th>
-          <th className="p-2 text-right">NOI Fin</th>
-          <th className="p-2 text-right">Depreciation</th>
-          <th className="p-2 text-right">Taxable Cash</th>
-          <th className="p-2 text-right">Taxable Fin</th>
-          <th className="p-2 text-right">AfterTax CF Cash</th>
-          <th className="p-2 text-right">AfterTax CF Fin</th>
-          <th className="p-2 text-right">Cash CF (No Dep)</th>
-          <th className="p-2 text-right">Fin CF (No Dep)</th>
-          <th className="p-2 text-right">Dep Shield Cash</th>
-          <th className="p-2 text-right">Dep Shield Fin</th>
-          <th className="p-2 text-right">Loan Balance</th>
-        </tr>
-      </thead>
-      <tbody>
-        {cash.map((c,i) => {
-          const f = fin[i];
-          return (
-            <tr key={c.year} className={i%2? 'bg-gray-50':''}>
-              <td className="p-2">{c.year}</td>
-              <td className="p-2 text-right">{c.rent.toFixed(0)}</td>
-              <td className="p-2 text-right">{c.expenses.toFixed(0)}</td>
-              <td className="p-2 text-right">{c.noi.toFixed(0)}</td>
-              <td className="p-2 text-right">{f.noi.toFixed(0)}</td>
-              <td className="p-2 text-right">{c.depreciation.toFixed(0)}</td>
-              <td className="p-2 text-right">{c.taxableIncome.toFixed(0)}</td>
-              <td className="p-2 text-right">{f.taxableIncome.toFixed(0)}</td>
-              <td className="p-2 text-right">{c.afterTaxCashFlow.toFixed(0)}</td>
-              <td className="p-2 text-right">{f.afterTaxCashFlow.toFixed(0)}</td>
-              <td className="p-2 text-right">{c.afterTaxCFBeforeDep.toFixed(0)}</td>
-              <td className="p-2 text-right">{f.afterTaxCFBeforeDep.toFixed(0)}</td>
-              <td className="p-2 text-right">{c.taxShieldDep.toFixed(0)}</td>
-              <td className="p-2 text-right">{f.taxShieldDep.toFixed(0)}</td>
-              <td className="p-2 text-right">{f.loanBalance.toFixed(0)}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
-);
+const TableView: React.FC<{ cash: YearResultBase[]; fin: YearResultFinanced[]; }> = ({ cash, fin }) => {
+  const formatCurrency = (value: number) => `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  
+  return (
+    <div className="overflow-auto bg-white rounded shadow">
+      <table className="min-w-full text-xs">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="p-2 text-left">Year</th>
+            <th className="p-2 text-right">Rent</th>
+            <th className="p-2 text-right">Expenses</th>
+            <th className="p-2 text-right">NOI Cash</th>
+            <th className="p-2 text-right">NOI Fin</th>
+            <th className="p-2 text-right">Depreciation</th>
+            <th className="p-2 text-right">Taxable Cash</th>
+            <th className="p-2 text-right">Taxable Fin</th>
+            <th className="p-2 text-right">AfterTax CF Cash</th>
+            <th className="p-2 text-right">AfterTax CF Fin</th>
+            <th className="p-2 text-right">Cash CF (No Dep)</th>
+            <th className="p-2 text-right">Fin CF (No Dep)</th>
+            <th className="p-2 text-right">Dep Shield Cash</th>
+            <th className="p-2 text-right">Dep Shield Fin</th>
+            <th className="p-2 text-right">Loan Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cash.map((c,i) => {
+            const f = fin[i];
+            return (
+              <tr key={c.year} className={i%2? 'bg-gray-50':''}>
+                <td className="p-2">{c.year}</td>
+                <td className="p-2 text-right font-medium">{formatCurrency(c.rent)}</td>
+                <td className="p-2 text-right">{formatCurrency(c.expenses)}</td>
+                <td className="p-2 text-right">{formatCurrency(c.noi)}</td>
+                <td className="p-2 text-right">{formatCurrency(f.noi)}</td>
+                <td className="p-2 text-right">{formatCurrency(c.depreciation)}</td>
+                <td className="p-2 text-right">{formatCurrency(c.taxableIncome)}</td>
+                <td className="p-2 text-right">{formatCurrency(f.taxableIncome)}</td>
+                <td className="p-2 text-right font-semibold text-green-600">{formatCurrency(c.afterTaxCashFlow)}</td>
+                <td className="p-2 text-right font-semibold text-blue-600">{formatCurrency(f.afterTaxCashFlow)}</td>
+                <td className="p-2 text-right">{formatCurrency(c.afterTaxCFBeforeDep)}</td>
+                <td className="p-2 text-right">{formatCurrency(f.afterTaxCFBeforeDep)}</td>
+                <td className="p-2 text-right text-purple-600">{formatCurrency(c.taxShieldDep)}</td>
+                <td className="p-2 text-right text-purple-600">{formatCurrency(f.taxShieldDep)}</td>
+                <td className="p-2 text-right font-semibold">{formatCurrency(f.loanBalance)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+};

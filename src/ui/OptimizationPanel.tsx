@@ -21,6 +21,16 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
     totalWealth: s.totalWealth
   }));
 
+  const formatCurrencyAxis = (value: number): string => {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    }
+    if (value >= 1000) {
+      return `$${(value / 1000).toFixed(0)}k`;
+    }
+    return `$${value.toFixed(0)}`;
+  };
+
   const hasImprovement = Math.abs(optimization.improvement.irrIncrease) > 0.001 || 
                         Math.abs(optimization.improvement.wealthIncrease) > 100;
 
@@ -65,7 +75,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <XAxis dataKey="loanPercent" />
-                    <YAxis />
+                    <YAxis tickFormatter={(value: number) => `${value.toFixed(1)}%`} />
                     <Tooltip formatter={(value, name) => [
                       name === 'irr' ? `${Number(value).toFixed(2)}%` : value,
                       name === 'irr' ? 'IRR' : 'Total Wealth'
@@ -83,7 +93,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <XAxis dataKey="loanPercent" />
-                    <YAxis />
+                    <YAxis tickFormatter={formatCurrencyAxis} />
                     <Tooltip formatter={(value) => [
                       `$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
                       'Total Wealth'
