@@ -41,14 +41,25 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
     }
   };
 
-  const numInput = (label: string, k: keyof InputState, step = 0.01) => (
+  const numInput = (label: string, k: keyof InputState, step = 0.01, min = 0) => (
     <label className="flex flex-col gap-1 text-sm" key={k as string}>
       <span className="font-medium">{label}</span>
       <input
         type="number"
         step={step}
+        min={min}
         value={value[k] as number}
-        onChange={(e) => update(k, parseFloat(e.target.value) || 0)}
+        onChange={(e) => {
+          const parsed = parseFloat(e.target.value);
+          const finalValue = isNaN(parsed) ? min : Math.max(parsed, min);
+          update(k, finalValue);
+        }}
+        onBlur={(e) => {
+          const parsed = parseFloat(e.target.value);
+          if (isNaN(parsed)) {
+            update(k, min);
+          }
+        }}
         className="border rounded px-2 py-1"
       />
     </label>
@@ -107,7 +118,7 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
         {numInput('Other Expenses (annual)', 'otherExpenses', 50)}
         {numInput('Expense Growth %', 'expenseGrowth', 0.001)}
         {numInput('Land %', 'landPercent', 0.01)}
-        {numInput('Horizon (yrs)', 'horizonYears', 1)}
+        {numInput('Horizon (yrs)', 'horizonYears', 1, 1)}
         {numInput('Appreciation %', 'appreciation', 0.001)}
         {numInput('Selling Costs %', 'sellingCostsPercent', 0.001)}
         {numInput('Tax Rate %', 'taxRate', 0.001)}
