@@ -9,6 +9,9 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
   const [listing, setListing] = useState<Listing | null>(null);
 
   function update<K extends keyof InputState>(k: K, v: InputState[K]) {
+    if (k === 'interestRate') {
+      console.log('🔄 Updating interestRate from', value.interestRate, 'to', v);
+    }
     onChange({ ...value, [k]: typeof v === 'number' ? Number(v) : v } as InputState);
   }
 
@@ -25,14 +28,17 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
     try {
       const fetchedListing = await fetchListing(value.address);
       setListing(fetchedListing);
-      onChange({
+      const updated = {
         ...value,
+        address: value.address, // Explicitly preserve address
         purchasePrice: fetchedListing.listPrice,
         grossAnnualRent: fetchedListing.grossAnnualRent || value.grossAnnualRent,
         taxes: fetchedListing.taxes || value.taxes,
         insurance: fetchedListing.insurance || value.insurance,
         hoa: fetchedListing.hoa ?? value.hoa,
-      });
+      };
+      console.log('🔍 Listing fetched - Updated fields:', Object.keys(updated), 'Count:', Object.keys(updated).length);
+      onChange(updated);
     } catch (err: any) {
       setError(`Error fetching listing: ${err.message}`);
       setListing(null);
@@ -73,7 +79,7 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
         value={(value[k] as string) || ''}
         onChange={(e) => update(k, e.target.value)}
         className="border rounded px-2 py-1"
-        placeholder="Enter property address"
+        placeholder={`Enter ${label.toLowerCase()}`}
       />
     </label>
   );

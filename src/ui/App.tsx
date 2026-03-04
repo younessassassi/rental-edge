@@ -14,6 +14,13 @@ import { PropertyService } from '../auth/service';
 export const App: React.FC = () => {
   const { isAuthenticated, user, signOut } = useAuth();
   const [inputs, setInputs] = useState<InputState>(initialInputs);
+  console.log('🎯 App state interestRate:', inputs.interestRate);
+  
+  const handleInputChange = (newInputs: InputState) => {
+    console.log('📝 InputsForm onChange fired - interestRate:', newInputs.interestRate);
+    setInputs(newInputs);
+  };
+
   const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const analysis = computeAnalysis(inputs);
@@ -22,11 +29,44 @@ export const App: React.FC = () => {
 
   const handleLoadProperty = (propertyId: string, propertyInputs: InputState) => {
     setCurrentPropertyId(propertyId);
-    setInputs(propertyInputs);
+    console.log('📂 Loading property with inputs:', propertyInputs);
+    console.log('📊 Loaded field count:', Object.keys(propertyInputs).length);
+    console.log('📋 Loaded fields:', Object.keys(propertyInputs));
+    
+    // Merge with defaults to ensure all required fields are present (for backward compatibility)
+    const mergedInputs = { ...initialInputs, ...propertyInputs };
+    console.log('✅ After merge field count:', Object.keys(mergedInputs).length);
+    console.log('✅ After merge fields:', Object.keys(mergedInputs));
+    
+    setInputs(mergedInputs);
   };
 
   const handleSaveCurrentProperty = () => {
     if (currentPropertyId) {
+      console.log('💾 Saving property with inputs:', inputs);
+      console.log('📊 Input field count:', Object.keys(inputs).length);
+      console.log('📋 All fields:', Object.keys(inputs));
+      console.log('🔍 Individual values:', {
+        address: inputs.address,
+        purchasePrice: inputs.purchasePrice,
+        closingCosts: inputs.closingCosts,
+        loanPercent: inputs.loanPercent,
+        interestRate: inputs.interestRate,
+        loanTermYears: inputs.loanTermYears,
+        grossAnnualRent: inputs.grossAnnualRent,
+        rentGrowth: inputs.rentGrowth,
+        taxes: inputs.taxes,
+        insurance: inputs.insurance,
+        hoa: inputs.hoa,
+        otherExpenses: inputs.otherExpenses,
+        expenseGrowth: inputs.expenseGrowth,
+        landPercent: inputs.landPercent,
+        horizonYears: inputs.horizonYears,
+        appreciation: inputs.appreciation,
+        sellingCostsPercent: inputs.sellingCostsPercent,
+        taxRate: inputs.taxRate,
+        capGainsRate: inputs.capGainsRate,
+      });
       try {
         PropertyService.updateProperty(currentPropertyId, { inputs });
         setSaveSuccess(true);
@@ -94,7 +134,7 @@ export const App: React.FC = () => {
               Export CSV
             </button>
           </div>
-          <InputsForm value={inputs} onChange={setInputs} />
+          <InputsForm value={inputs} onChange={handleInputChange} />
           <ResultsView analysis={analysis} />
         </div>
       </div>

@@ -81,6 +81,10 @@ export class PropertyService {
       updatedAt: new Date().toISOString()
     };
 
+    console.log('🔵 PropertyService.saveProperty - Inputs being saved:', property.inputs);
+    console.log('📊 Field count:', Object.keys(property.inputs).length);
+    console.log('📋 Fields:', Object.keys(property.inputs));
+    
     allProperties.push(newProperty);
     localStorage.setItem(PROPERTIES_KEY, JSON.stringify(allProperties));
     return newProperty;
@@ -95,12 +99,25 @@ export class PropertyService {
       throw new Error('Property not found');
     }
 
+    console.log('🟡 PropertyService.updateProperty - Inputs being saved:', updates.inputs);
+    console.log('📊 Field count:', updates.inputs ? Object.keys(updates.inputs).length : 0);
+    console.log('📋 Fields:', updates.inputs ? Object.keys(updates.inputs) : []);
+    
+    // Specific check for interestRate
+    if (updates.inputs) {
+      console.log('⚡ interestRate in updates.inputs:', updates.inputs.interestRate);
+      console.log('⚡ interestRate type:', typeof updates.inputs.interestRate);
+    }
+
     allProperties[index] = {
       ...allProperties[index],
       ...updates,
       updatedAt: new Date().toISOString()
     };
 
+    // Verify after merge
+    console.log('✅ After merge - interestRate:', allProperties[index].inputs?.interestRate);
+    
     localStorage.setItem(PROPERTIES_KEY, JSON.stringify(allProperties));
     return allProperties[index];
   }
