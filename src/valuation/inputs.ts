@@ -1,6 +1,7 @@
 export interface InputState {
   address?: string; // property address for fetching listing data
   purchasePrice: number;
+  closingCosts: number; // closing costs added to down payment
   loanPercent: number; // 0-1
   interestRate: number; // annual nominal, 0-1
   loanTermYears: number;
@@ -22,6 +23,7 @@ export interface InputState {
 export const initialInputs: InputState = {
   address: '',
   purchasePrice: 400000,
+  closingCosts: 15000,
   loanPercent: 0.7,
   interestRate: 0.065,
   loanTermYears: 30,

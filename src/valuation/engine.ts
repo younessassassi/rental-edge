@@ -88,7 +88,7 @@ export function computeAnalysis(inputs: InputState): AnalysisResult {
   const capGainsTax = capitalGainPortion * inputs.capGainsRate;
   const saleNet = saleGross - recaptureTax - capGainsTax;
 
-  const initialInvestment = -inputs.purchasePrice;
+  const initialInvestment = -(inputs.purchasePrice + inputs.closingCosts);
   const cashCF: number[] = [initialInvestment, ...cashYearly.map(r => r.afterTaxCashFlow), saleNet];
   const cashIrr = irr(cashCF);
   const operationsCashFlowCash = cashYearly.reduce((a,b)=>a+b.afterTaxCashFlow,0);
@@ -96,7 +96,7 @@ export function computeAnalysis(inputs: InputState): AnalysisResult {
 
   // FINANCED SCENARIO
   const loanAmount = inputs.purchasePrice * inputs.loanPercent;
-  const downPayment = inputs.purchasePrice - loanAmount;
+  const downPayment = inputs.purchasePrice - loanAmount + inputs.closingCosts;
   const monthlyRate = inputs.interestRate / 12;
   const nPayments = inputs.loanTermYears * 12;
   const monthlyPayment = loanAmount * (monthlyRate) / (1 - Math.pow(1 + monthlyRate, -nPayments));

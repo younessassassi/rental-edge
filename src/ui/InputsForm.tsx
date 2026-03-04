@@ -91,6 +91,7 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
 
       <div className="grid md:grid-cols-4 gap-4 bg-white p-4 rounded shadow">
         {numInput('Purchase Price', 'purchasePrice', 1000)}
+        {numInput('Closing Costs', 'closingCosts', 100)}
         {numInput('Loan %', 'loanPercent', 0.01)}
         {numInput('Interest Rate', 'interestRate', 0.001)}
         {numInput('Loan Term (yrs)', 'loanTermYears', 1)}

@@ -25,7 +25,11 @@ export const ResultsView: React.FC<{ analysis: AnalysisResult }> = ({ analysis }
   <SummaryCard title="Financed Scenario" irr={financed.irr} total={financed.totalWealth} sale={financed.saleProceedsNet} ops={financed.operationsCashFlow} />
       </div>
       <div className="h-80 bg-white p-4 rounded shadow">
-        <ResponsiveContainer width="100%" height="100%">
+        <div className="mb-2">
+          <h3 className="font-semibold text-sm text-gray-700">📊 Cumulative Cash Flow & Loan Balance</h3>
+          <p className="text-xs text-gray-500">Green line: Total cash accumulated over time (buy & hold). Blue line: Same but with financing. Red line: How much you still owe on the loan each year.</p>
+        </div>
+        <ResponsiveContainer width="100%" height="85%">
           <LineChart data={chartData}>
             <XAxis dataKey="year" />
             <YAxis />
@@ -44,14 +48,26 @@ export const ResultsView: React.FC<{ analysis: AnalysisResult }> = ({ analysis }
 
 const SummaryCard: React.FC<{ title: string; irr: number | null; total: number; sale: number; ops: number; }> = ({ title, irr, total, sale, ops }) => {
   const totalRev = ops + sale;
+  const isCash = title.includes('Cash');
   return (
-    <div className="bg-white p-4 rounded shadow text-sm space-y-1">
-      <h2 className="font-semibold mb-2 text-base">{title}</h2>
-      <p><span className="font-medium">IRR:</span> {irr !== null ? (irr*100).toFixed(2)+ '%' : 'n/a'}</p>
-      <p><span className="font-medium">Operations Cash Flow:</span> {ops.toLocaleString(undefined,{maximumFractionDigits:0})}</p>
-      <p><span className="font-medium">Sale Proceeds (Net):</span> {sale.toLocaleString(undefined,{maximumFractionDigits:0})}</p>
-      <p><span className="font-medium">Total Revenue:</span> {totalRev.toLocaleString(undefined,{maximumFractionDigits:0})}</p>
-      <p><span className="font-medium">Total Wealth (Ops + Sale):</span> {total.toLocaleString(undefined,{maximumFractionDigits:0})}</p>
+    <div className="bg-white p-4 rounded shadow text-sm space-y-2">
+      <h2 className="font-semibold mb-3 text-base">{title}</h2>
+      <div className="space-y-1 border-l-4 border-blue-200 pl-3 bg-blue-50 py-2 px-2 rounded text-xs">
+        <p><span className="font-medium">IRR:</span> {irr !== null ? (irr*100).toFixed(2)+ '%' : 'n/a'}</p>
+        <p className="text-gray-600">Annual return on your money invested</p>
+      </div>
+      <div className="space-y-1 border-l-4 border-green-200 pl-3 bg-green-50 py-2 px-2 rounded text-xs">
+        <p><span className="font-medium">Operations Cash Flow:</span> ${ops.toLocaleString(undefined,{maximumFractionDigits:0})}</p>
+        <p className="text-gray-600">Total cash from rent after all expenses & taxes over {title.includes('Cash') ? 'buy & hold' : 'financing'}</p>
+      </div>
+      <div className="space-y-1 border-l-4 border-purple-200 pl-3 bg-purple-50 py-2 px-2 rounded text-xs">
+        <p><span className="font-medium">Sale Proceeds (Net):</span> ${sale.toLocaleString(undefined,{maximumFractionDigits:0})}</p>
+        <p className="text-gray-600">Money left after selling {isCash ? '' : 'and paying off loan'} and taxes</p>
+      </div>
+      <div className="space-y-1 border-l-4 border-amber-200 pl-3 bg-amber-50 py-2 px-2 rounded text-xs font-semibold">
+        <p>💰 Total Wealth: ${total.toLocaleString(undefined,{maximumFractionDigits:0})}</p>
+        <p className="font-normal text-gray-600">Operations cash + sale proceeds = your total profit</p>
+      </div>
     </div>
   );
 };

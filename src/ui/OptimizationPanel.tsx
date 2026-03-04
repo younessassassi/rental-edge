@@ -59,7 +59,8 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-medium text-blue-900 mb-2">IRR by Loan-to-Value Ratio</h4>
+              <h4 className="font-medium text-blue-900 mb-1">📈 IRR by Loan-to-Value Ratio</h4>
+              <p className="text-xs text-gray-600 mb-2">How much return you make per year at different debt levels. Higher point = better annual return. Sweet spot balances borrowing with profitability.</p>
               <div className="h-40 bg-white p-2 rounded border">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
@@ -76,7 +77,8 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
             </div>
             
             <div>
-              <h4 className="font-medium text-blue-900 mb-2">Total Wealth by Loan-to-Value Ratio</h4>
+              <h4 className="font-medium text-blue-900 mb-1">💰 Total Wealth by Loan-to-Value Ratio</h4>
+              <p className="text-xs text-gray-600 mb-2">Total money you'll have after 15 years at different debt levels. Shows if borrowing more saves you or costs you in the long run.</p>
               <div className="h-40 bg-white p-2 rounded border">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
@@ -94,7 +96,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
           </div>
           
           <div>
-            <h4 className="font-medium text-blue-900 mb-2">All Scenarios</h4>
+            <h4 className="font-medium text-blue-900 mb-2">📊 All Scenarios (Green = Recommended)</h4>
             <div className="bg-white rounded border overflow-hidden">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50">
