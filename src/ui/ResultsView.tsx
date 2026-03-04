@@ -25,8 +25,8 @@ export const ResultsView: React.FC<{ analysis: AnalysisResult }> = ({ analysis }
         <div className="p-2 text-sm bg-yellow-100 border border-yellow-300 text-yellow-800 rounded">Warning: Negative after-tax cash flow detected in financed scenario.</div>
       )}
       <div className="grid md:grid-cols-2 gap-6">
-  <SummaryCard title="Cash Scenario" irr={cash.irr} total={cash.totalWealth} sale={cash.saleProceedsNet} ops={cash.operationsCashFlow} />
-  <SummaryCard title="Financed Scenario" irr={financed.irr} total={financed.totalWealth} sale={financed.saleProceedsNet} ops={financed.operationsCashFlow} />
+  <SummaryCard title="Cash Scenario" irr={cash.irr} total={cash.totalWealth} sale={cash.saleProceedsNet} ops={cash.operationsCashFlow} analysis={analysis} />
+  <SummaryCard title="Financed Scenario" irr={financed.irr} total={financed.totalWealth} sale={financed.saleProceedsNet} ops={financed.operationsCashFlow} analysis={analysis} />
       </div>
       <div className="h-80 bg-white p-4 rounded shadow">
         <div className="mb-2">
@@ -50,12 +50,41 @@ export const ResultsView: React.FC<{ analysis: AnalysisResult }> = ({ analysis }
   );
 };
 
-const SummaryCard: React.FC<{ title: string; irr: number | null; total: number; sale: number; ops: number; }> = ({ title, irr, total, sale, ops }) => {
+const SummaryCard: React.FC<{ title: string; irr: number | null; total: number; sale: number; ops: number; analysis: AnalysisResult; }> = ({ title, irr, total, sale, ops, analysis }) => {
   const totalRev = ops + sale;
   const isCash = title.includes('Cash');
+  const { purchasePrice, loanPercent, closingCosts } = analysis.inputs;
+  const downPayment = purchasePrice - (purchasePrice * loanPercent);
+  const loanAmount = purchasePrice * loanPercent;
+  const cashScenarioTotal = purchasePrice + closingCosts;
+  const financedScenarioTotal = downPayment + closingCosts;
+  
   return (
     <div className="bg-white p-4 rounded shadow text-sm space-y-2">
       <h2 className="font-semibold mb-3 text-base">{title}</h2>
+      
+      {isCash && (
+        <div className="space-y-1 border-l-4 border-gray-300 pl-3 bg-gray-50 py-2 px-2 rounded text-xs mb-3">
+          <p className="font-medium mb-1">💵 Cash Needed</p>
+          <div className="ml-2 space-y-0.5 text-gray-700">
+            <p>Purchase Price: ${purchasePrice.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+            <p>Closing Costs: ${closingCosts.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+            <p className="border-t border-gray-300 mt-1 pt-1 font-semibold">Total Cash: ${cashScenarioTotal.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+          </div>
+        </div>
+      )}
+      
+      {!isCash && (
+        <div className="space-y-1 border-l-4 border-gray-300 pl-3 bg-gray-50 py-2 px-2 rounded text-xs mb-3">
+          <p className="font-medium mb-1">💵 Cash Needed</p>
+          <div className="ml-2 space-y-0.5 text-gray-700">
+            <p>Down Payment: ${downPayment.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+            <p>Closing Costs: ${closingCosts.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+            <p className="border-t border-gray-300 mt-1 pt-1 font-semibold">Total Cash: ${financedScenarioTotal.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+            <p className="text-gray-600 mt-2">Loan Amount: ${loanAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+          </div>
+        </div>
+      )}
       <div className="space-y-1 border-l-4 border-blue-200 pl-3 bg-blue-50 py-2 px-2 rounded text-xs">
         <p><span className="font-medium">IRR:</span> {irr !== null ? (irr*100).toFixed(2)+ '%' : 'n/a'}</p>
         <p className="text-gray-600">Annual return on your money invested</p>
