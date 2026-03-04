@@ -9,13 +9,33 @@ import { OptimizationPanel } from './OptimizationPanel';
 import { buildCsv, downloadCsv } from '../util/csv';
 import { useAuth } from '../auth/AuthContext';
 import { optimizeFinancing, getOptimizationRecommendation } from '../valuation/optimizer';
+import { PropertyService } from '../auth/service';
 
 export const App: React.FC = () => {
   const { isAuthenticated, user, signOut } = useAuth();
   const [inputs, setInputs] = useState<InputState>(initialInputs);
+  const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const analysis = computeAnalysis(inputs);
   const optimization = optimizeFinancing(inputs);
   const recommendation = getOptimizationRecommendation(optimization);
+
+  const handleLoadProperty = (propertyId: string, propertyInputs: InputState) => {
+    setCurrentPropertyId(propertyId);
+    setInputs(propertyInputs);
+  };
+
+  const handleSaveCurrentProperty = () => {
+    if (currentPropertyId) {
+      try {
+        PropertyService.updateProperty(currentPropertyId, { inputs });
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } catch (err: any) {
+        alert('Error saving property: ' + err.message);
+      }
+    }
+  };
 
   if (!isAuthenticated) {
     return <AuthForm />;
@@ -41,7 +61,7 @@ export const App: React.FC = () => {
           <PropertyManager
             userId={user!.id}
             currentInputs={inputs}
-            onLoadProperty={setInputs}
+            onLoadProperty={(propertyId, inputs) => handleLoadProperty(propertyId, inputs)}
           />
         </div>
         
@@ -53,6 +73,18 @@ export const App: React.FC = () => {
           />
           
           <div className="flex gap-2 flex-wrap">
+            {currentPropertyId && (
+              <button
+                onClick={handleSaveCurrentProperty}
+                className={`text-sm px-3 py-1 rounded ${
+                  saveSuccess
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-orange-600 hover:bg-orange-700'
+                } text-white`}
+              >
+                {saveSuccess ? '✓ Saved' : 'Save Changes'}
+              </button>
+            )}
             <button
               onClick={() => {
                 const csv = buildCsv(analysis.cash.yearly as any, analysis.financed.yearly as any);
