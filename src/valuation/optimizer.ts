@@ -24,9 +24,12 @@ export function optimizeFinancing(inputs: InputState): OptimizationResult {
   // Restrict to maximum 80% financing (minimum 20% down payment)
   const loanPercentOptions = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8];
   
-  // Test different loan percentages
+  // Test different loan percentages, using per-tier interest rate if available
+  const rateMap = inputs.rateByLoanPercent || {};
   for (const loanPercent of loanPercentOptions) {
-    const testInputs = { ...inputs, loanPercent };
+    const tierRate = rateMap[String(loanPercent)];
+    const interestRate = tierRate !== undefined ? tierRate : inputs.interestRate;
+    const testInputs = { ...inputs, loanPercent, interestRate };
     const analysis = computeAnalysis(testInputs);
     
     // Use financed scenario if loan > 0, otherwise cash scenario

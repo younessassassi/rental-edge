@@ -1,3 +1,18 @@
+// Map of loan percent (as string key like "0.7") to interest rate for that tier
+export type RateByLoanPercent = Record<string, number>;
+
+export const defaultRateByLoanPercent: RateByLoanPercent = {
+  '0':   0,
+  '0.1': 0.07,
+  '0.2': 0.07,
+  '0.3': 0.0675,
+  '0.4': 0.0675,
+  '0.5': 0.065,
+  '0.6': 0.065,
+  '0.7': 0.065,
+  '0.8': 0.07,
+};
+
 export interface InputState {
   address?: string; // property address for fetching listing data
   purchasePrice: number;
@@ -5,6 +20,7 @@ export interface InputState {
   loanPercent: number; // 0-1
   interestRate: number; // annual nominal, 0-1
   loanTermYears: number;
+  rateByLoanPercent?: RateByLoanPercent; // optional per-tier rates for optimization
   grossAnnualRent: number;
   rentGrowth: number; // 0-1
   taxes: number; // annual property tax amount
@@ -27,6 +43,7 @@ export const initialInputs: InputState = {
   loanPercent: 0.7,
   interestRate: 0.065,
   loanTermYears: 30,
+  rateByLoanPercent: { ...defaultRateByLoanPercent },
   grossAnnualRent: 36000,
   rentGrowth: 0.03,
   taxes: 4800,

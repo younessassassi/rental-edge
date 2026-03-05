@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { initialInputs, InputState } from '../valuation/inputs';
+import { initialInputs, InputState, defaultRateByLoanPercent, RateByLoanPercent } from '../valuation/inputs';
 import { computeAnalysis } from '../valuation/engine';
 import { ResultsView } from './ResultsView';
 import { InputsForm } from './InputsForm';
@@ -108,7 +108,9 @@ export const App: React.FC = () => {
           <OptimizationPanel
             optimization={optimization}
             recommendation={recommendation}
-            onApplyOptimal={(loanPercent) => setInputs({ ...inputs, loanPercent })}
+            rateByLoanPercent={inputs.rateByLoanPercent || defaultRateByLoanPercent}
+            onApplyOptimal={(loanPercent, interestRate) => setInputs({ ...inputs, loanPercent, interestRate })}
+            onRateMapChange={(rateMap: RateByLoanPercent) => setInputs({ ...inputs, rateByLoanPercent: rateMap })}
           />
           
           <div className="flex gap-2 flex-wrap">
