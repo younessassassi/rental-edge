@@ -62,7 +62,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
   };
   
   const chartData = optimization.allScenarios.map(s => ({
-    loanPercent: s.loanPercent * 100,
+    downPercent: ((1 - s.loanPercent) * 100),
     irr: s.irr * 100,
     totalWealth: s.totalWealth,
     netProfit: s.netProfit,
@@ -185,12 +185,12 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-medium text-blue-900 mb-1">📈 IRR by Loan-to-Value Ratio</h4>
-              <p className="text-xs text-gray-600 mb-2">How much return you make per year at different debt levels. Higher point = better annual return. Sweet spot balances borrowing with profitability.</p>
+              <h4 className="font-medium text-blue-900 mb-1">📈 IRR by Down Payment</h4>
+              <p className="text-xs text-gray-600 mb-2">How much return you make per year at different down payment levels. Higher point = better annual return. Sweet spot balances borrowing with profitability.</p>
               <div className="h-40 bg-white p-2 rounded border">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <XAxis dataKey="loanPercent" />
+                    <XAxis dataKey="downPercent" tickFormatter={(v: number) => `${v}%`} />
                     <YAxis tickFormatter={(value: number) => `${value.toFixed(1)}%`} />
                     <Tooltip formatter={(value, name) => [
                       name === 'irr' ? `${Number(value).toFixed(2)}%` : value,
@@ -203,12 +203,12 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
             </div>
             
             <div>
-              <h4 className="font-medium text-blue-900 mb-1">💰 Net Profit by Loan-to-Value Ratio</h4>
+              <h4 className="font-medium text-blue-900 mb-1">💰 Net Profit by Down Payment</h4>
               <p className="text-xs text-gray-600 mb-2">Total profit (operations + sale) minus cash invested upfront (incl. points). Shows true return accounting for all upfront costs.</p>
               <div className="h-40 bg-white p-2 rounded border">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <XAxis dataKey="loanPercent" />
+                    <XAxis dataKey="downPercent" tickFormatter={(v: number) => `${v}%`} />
                     <YAxis tickFormatter={formatCurrencyAxis} />
                     <Tooltip formatter={(value) => [
                       `$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
@@ -227,7 +227,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
               <table className="w-full text-xs">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="p-2 text-left">Loan %</th>
+                    <th className="p-2 text-left">Down Pmt</th>
                     <th className="p-2 text-right">Rate</th>
                     <th className="p-2 text-right">Points</th>
                     <th className="p-2 text-right">IRR</th>
@@ -244,7 +244,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                     const displayPoints = scenario.loanPercent === 0 ? 'N/A' : (computedPoints > 0 ? `${(computedPoints * 100).toFixed(2)}%` : '0');
                     return (
                     <tr key={i} className={`${scenario.loanPercent === optimization.bestLoanPercent ? 'bg-green-50 font-medium' : ''} ${i % 2 ? 'bg-gray-25' : ''}`}>
-                      <td className="p-2">{(scenario.loanPercent * 100).toFixed(0)}%</td>
+                      <td className="p-2">{((1 - scenario.loanPercent) * 100).toFixed(0)}% down</td>
                       <td className="p-2 text-right">{displayRate}</td>
                       <td className="p-2 text-right">{displayPoints}</td>
                       <td className="p-2 text-right">{(scenario.irr * 100).toFixed(2)}%</td>
