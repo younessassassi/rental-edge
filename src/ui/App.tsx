@@ -12,7 +12,7 @@ import { optimizeFinancing, getOptimizationRecommendation } from '../valuation/o
 import { PropertyService } from '../auth/service';
 
 export const App: React.FC = () => {
-  const { isAuthenticated, user, signOut } = useAuth();
+  const { isAuthenticated, user, signOut, loading: authLoading } = useAuth();
   const [inputs, setInputs] = useState<InputState>(initialInputs);
   const [hasAutoLoadedLatest, setHasAutoLoadedLatest] = useState(false);
   
@@ -31,15 +31,15 @@ export const App: React.FC = () => {
       return;
     }
 
-    const userProperties = PropertyService.getProperties(user.id);
-    if (userProperties.length > 0) {
-      const latestProperty = userProperties[0];
-      const mergedInputs = { ...initialInputs, ...latestProperty.inputs };
-      setCurrentPropertyId(latestProperty.id);
-      setInputs(mergedInputs);
-    }
-
-    setHasAutoLoadedLatest(true);
+    PropertyService.getProperties(user.id).then((userProperties) => {
+      if (userProperties.length > 0) {
+        const latestProperty = userProperties[0];
+        const mergedInputs = { ...initialInputs, ...latestProperty.inputs };
+        setCurrentPropertyId(latestProperty.id);
+        setInputs(mergedInputs);
+      }
+      setHasAutoLoadedLatest(true);
+    });
   }, [user?.id, hasAutoLoadedLatest]);
 
   useEffect(() => {
@@ -57,10 +57,10 @@ export const App: React.FC = () => {
     setInputs(mergedInputs);
   };
 
-  const handleSaveCurrentProperty = () => {
+  const handleSaveCurrentProperty = async () => {
     if (currentPropertyId) {
       try {
-        PropertyService.updateProperty(currentPropertyId, { inputs });
+        await PropertyService.updateProperty(currentPropertyId, { inputs });
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       } catch (err: any) {
@@ -74,6 +74,14 @@ export const App: React.FC = () => {
     setSaveSuccess(false);
     setInputs(initialInputs);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <AuthForm />;

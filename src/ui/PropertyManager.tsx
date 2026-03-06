@@ -27,9 +27,13 @@ export const PropertyManager: React.FC<PropertyManagerProps> = ({
     loadProperties();
   }, [userId]);
 
-  const loadProperties = () => {
-    const userProperties = PropertyService.getProperties(userId);
-    setProperties(userProperties);
+  const loadProperties = async () => {
+    try {
+      const userProperties = await PropertyService.getProperties(userId);
+      setProperties(userProperties);
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   const getSuggestedName = () => {
@@ -47,11 +51,11 @@ export const PropertyManager: React.FC<PropertyManagerProps> = ({
     setSaveDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const finalName = propertyName.trim() || getSuggestedName();
 
     try {
-      PropertyService.saveProperty({
+      await PropertyService.saveProperty({
         name: finalName,
         inputs: currentInputs,
         userId
@@ -59,7 +63,7 @@ export const PropertyManager: React.FC<PropertyManagerProps> = ({
       setPropertyName('');
       setSaveDialogOpen(false);
       setError('');
-      loadProperties();
+      await loadProperties();
     } catch (err: any) {
       setError(err.message);
     }
@@ -69,10 +73,10 @@ export const PropertyManager: React.FC<PropertyManagerProps> = ({
     onLoadProperty(property.id, property.inputs);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this property?')) {
-      PropertyService.deleteProperty(id);
-      loadProperties();
+      await PropertyService.deleteProperty(id);
+      await loadProperties();
     }
   };
 
@@ -86,18 +90,18 @@ export const PropertyManager: React.FC<PropertyManagerProps> = ({
     setEditName('');
   };
 
-  const saveEdit = (id: string) => {
+  const saveEdit = async (id: string) => {
     if (!editName.trim()) {
       setError('Property name is required');
       return;
     }
 
     try {
-      PropertyService.updateProperty(id, { name: editName });
+      await PropertyService.updateProperty(id, { name: editName });
       setEditingId(null);
       setEditName('');
       setError('');
-      loadProperties();
+      await loadProperties();
     } catch (err: any) {
       setError(err.message);
     }

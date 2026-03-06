@@ -1,11 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthState, User } from './types';
-import { AuthService } from './service';
+import { auth } from './firebase';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  User as FirebaseUser,
+} from 'firebase/auth';
 
 interface AuthContextType extends AuthState {
-  signIn: (email: string) => Promise<void>;
-  signUp: (email: string) => Promise<void>;
-  signOut: () => void;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +26,14 @@ export const useAuth = () => {
   return context;
 };
 
+function toUser(fbUser: FirebaseUser): User {
+  return {
+    id: fbUser.uid,
+    email: fbUser.email ?? '',
+    createdAt: fbUser.metadata.creationTime ?? new Date().toISOString(),
+  };
+}
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -25,41 +41,36 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
-    isAuthenticated: false
+    isAuthenticated: false,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = AuthService.getCurrentUser();
-    if (user) {
-      setAuthState({ user, isAuthenticated: true });
-    }
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        setAuthState({ user: toUser(fbUser), isAuthenticated: true });
+      } else {
+        setAuthState({ user: null, isAuthenticated: false });
+      }
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
-  const signIn = async (email: string) => {
-    try {
-      const user = AuthService.signIn(email);
-      setAuthState({ user, isAuthenticated: true });
-    } catch (error) {
-      throw error;
-    }
+  const signIn = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signUp = async (email: string) => {
-    try {
-      const user = AuthService.signUp(email);
-      setAuthState({ user, isAuthenticated: true });
-    } catch (error) {
-      throw error;
-    }
+  const signUp = async (email: string, password: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
   };
 
-  const signOut = () => {
-    AuthService.signOut();
-    setAuthState({ user: null, isAuthenticated: false });
+  const signOut = async () => {
+    await firebaseSignOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut, loading }}>
       {children}
     </AuthContext.Provider>
   );
