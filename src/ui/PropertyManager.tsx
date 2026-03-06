@@ -6,6 +6,7 @@ import { InputState } from '../valuation/inputs';
 interface PropertyManagerProps {
   userId: string;
   currentInputs: InputState;
+  refreshKey: number;
   onLoadProperty: (propertyId: string, inputs: InputState, name: string) => void;
   onCreateNewProperty: () => void;
 }
@@ -13,6 +14,7 @@ interface PropertyManagerProps {
 export const PropertyManager: React.FC<PropertyManagerProps> = ({ 
   userId, 
   currentInputs, 
+  refreshKey,
   onLoadProperty,
   onCreateNewProperty,
 }) => {
@@ -25,7 +27,7 @@ export const PropertyManager: React.FC<PropertyManagerProps> = ({
 
   useEffect(() => {
     loadProperties();
-  }, [userId]);
+  }, [userId, refreshKey]);
 
   const loadProperties = async () => {
     try {

@@ -24,6 +24,7 @@ export const App: React.FC = () => {
   const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
   const [currentPropertyName, setCurrentPropertyName] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [propertyRefreshKey, setPropertyRefreshKey] = useState(0);
   // Resolve per-tier rate/points overrides for the current loan percent
   const effectiveInputs = (() => {
     const rateMap = inputs.rateByLoanPercent || {};
@@ -78,6 +79,7 @@ export const App: React.FC = () => {
       try {
         await PropertyService.updateProperty(currentPropertyId, { inputs });
         setSaveSuccess(true);
+        setPropertyRefreshKey(k => k + 1);
         setTimeout(() => setSaveSuccess(false), 3000);
       } catch (err: any) {
         alert('Error saving property: ' + err.message);
@@ -145,6 +147,7 @@ export const App: React.FC = () => {
           <PropertyManager
             userId={user!.id}
             currentInputs={inputs}
+            refreshKey={propertyRefreshKey}
             onLoadProperty={(propertyId, inputs, name) => handleLoadProperty(propertyId, inputs, name)}
             onCreateNewProperty={handleCreateNewProperty}
           />
