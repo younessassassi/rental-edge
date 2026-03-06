@@ -7,6 +7,7 @@ import { AuthForm } from './AuthForm';
 import { PropertyManager } from './PropertyManager';
 import { OptimizationPanel } from './OptimizationPanel';
 import { buildCsv, downloadCsv } from '../util/csv';
+import { downloadExcel } from '../util/excel';
 import { useAuth } from '../auth/AuthContext';
 import { optimizeFinancing, getOptimizationRecommendation } from '../valuation/optimizer';
 import { PropertyService } from '../auth/service';
@@ -91,6 +92,27 @@ export const App: React.FC = () => {
     setInputs(initialInputs);
   };
 
+  const handleExportExcel = async () => {
+    if (!user?.id) return;
+    try {
+      const allProperties = await PropertyService.getProperties(user.id);
+      const propertyDataList = allProperties.map(p => ({
+        name: p.name,
+        inputs: { ...initialInputs, ...p.inputs } as InputState,
+      }));
+      if (propertyDataList.length === 0) {
+        // No saved properties — export current inputs
+        propertyDataList.push({
+          name: currentPropertyName || 'Current Property',
+          inputs: inputs,
+        });
+      }
+      downloadExcel(propertyDataList);
+    } catch (err: any) {
+      alert('Error exporting: ' + err.message);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -158,6 +180,11 @@ export const App: React.FC = () => {
                 }}
                 className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700">
                 Export CSV
+              </button>
+              <button
+                onClick={handleExportExcel}
+                className="bg-emerald-600 text-white text-sm px-3 py-1.5 rounded hover:bg-emerald-700">
+                Export All (Excel)
               </button>
             </div>
           </div>
