@@ -37,7 +37,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
       const { [String(loanPct)]: _, ...rest } = rateByLoanPercent;
       onRateMapChange(rest);
     } else {
-      onRateMapChange({ ...rateByLoanPercent, [String(loanPct)]: parsed });
+      onRateMapChange({ ...rateByLoanPercent, [String(loanPct)]: parsed / 100 });
     }
   };
 
@@ -47,7 +47,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
       const { [String(loanPct)]: _, ...rest } = pointsByLoanPercent;
       onPointsMapChange(rest);
     } else {
-      onPointsMapChange({ ...pointsByLoanPercent, [String(loanPct)]: parsed });
+      onPointsMapChange({ ...pointsByLoanPercent, [String(loanPct)]: parsed / 100 });
     }
   };
 
@@ -84,7 +84,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
   return (
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-blue-900">Financing Optimization</h3>
+        <h3 className="text-lg font-semibold text-blue-900">Find Your Best Down Payment</h3>
         <div className="flex gap-3">
           <button
             onClick={() => setShowRateEditor(!showRateEditor)}
@@ -118,8 +118,6 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                 {loanPercentOptions.map(lp => {
                   const currentRate = rateByLoanPercent[String(lp)];
                   const currentPoints = pointsByLoanPercent[String(lp)];
-                  const effectiveRate = currentRate !== undefined ? currentRate : defaultRate;
-                  const effectivePoints = currentPoints !== undefined ? currentPoints : defaultPoints;
                   return (
                     <tr key={lp}>
                       <td className="p-1 text-gray-700 font-medium">{((1 - lp) * 100).toFixed(0)}% down</td>
@@ -127,30 +125,30 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                         <div className="flex items-center gap-1">
                           <input
                             type="number"
-                            step="0.001"
+                            step="0.1"
                             min="0"
-                            value={currentRate ?? ''}
+                            value={currentRate !== undefined ? parseFloat((currentRate * 100).toFixed(4)) : ''}
                             onChange={(e) => handleRateChange(lp, e.target.value)}
                             className={`border rounded px-1.5 py-0.5 w-20 text-xs ${currentRate === undefined && lp > 0 ? 'text-gray-400' : ''}`}
-                            placeholder={lp === 0 ? 'N/A' : String(defaultRate)}
+                            placeholder={lp === 0 ? 'N/A' : String(parseFloat((defaultRate * 100).toFixed(4)))}
                             disabled={lp === 0}
                           />
-                          {lp > 0 && <span className={`text-xs ${currentRate !== undefined ? 'text-gray-500' : 'text-gray-400'}`}>{(effectiveRate * 100).toFixed(2)}%</span>}
+                          {lp > 0 && <span className="text-gray-400 text-xs">%</span>}
                         </div>
                       </td>
                       <td className="p-1">
                         <div className="flex items-center gap-1">
                           <input
                             type="number"
-                            step="0.001"
+                            step="0.1"
                             min="0"
-                            value={currentPoints ?? ''}
+                            value={currentPoints !== undefined ? parseFloat((currentPoints * 100).toFixed(4)) : ''}
                             onChange={(e) => handlePointsChange(lp, e.target.value)}
                             className={`border rounded px-1.5 py-0.5 w-20 text-xs ${currentPoints === undefined && lp > 0 ? 'text-gray-400' : ''}`}
-                            placeholder={lp === 0 ? 'N/A' : String(defaultPoints)}
+                            placeholder={lp === 0 ? 'N/A' : String(parseFloat((defaultPoints * 100).toFixed(4)))}
                             disabled={lp === 0}
                           />
-                          {lp > 0 && effectivePoints > 0 && <span className={`text-xs ${currentPoints !== undefined ? 'text-gray-500' : 'text-gray-400'}`}>{(effectivePoints * 100).toFixed(2)}%</span>}
+                          {lp > 0 && <span className="text-gray-400 text-xs">%</span>}
                         </div>
                       </td>
                     </tr>
@@ -171,11 +169,11 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
               onClick={() => onApplyOptimal(optimization.bestLoanPercent, getBestRate(), getBestPoints())}
               className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
             >
-              Apply Optimal ({(optimization.bestLoanPercent * 100).toFixed(0)}% financing, ${((1 - optimization.bestLoanPercent) * optimization.allScenarios[0].analysis.inputs.purchasePrice).toLocaleString(undefined, { maximumFractionDigits: 0 })} down)
+              Apply Recommended ({((1 - optimization.bestLoanPercent) * 100).toFixed(0)}% down, ${((1 - optimization.bestLoanPercent) * optimization.allScenarios[0].analysis.inputs.purchasePrice).toLocaleString(undefined, { maximumFractionDigits: 0 })})
             </button>
             <span className="text-sm text-blue-600">
-              Current IRR: {(optimization.currentIRR * 100).toFixed(2)}% → 
-              Optimal IRR: {(optimization.bestIRR * 100).toFixed(2)}%
+              Your Return: {(optimization.currentIRR * 100).toFixed(2)}% → 
+              Best Return: {(optimization.bestIRR * 100).toFixed(2)}%
             </span>
           </div>
         )}
@@ -185,8 +183,8 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-medium text-blue-900 mb-1">📈 IRR by Down Payment</h4>
-              <p className="text-xs text-gray-600 mb-2">How much return you make per year at different down payment levels. Higher point = better annual return. Sweet spot balances borrowing with profitability.</p>
+              <h4 className="font-medium text-blue-900 mb-1">📈 Annual Return by Down Payment</h4>
+              <p className="text-xs text-gray-600 mb-2">How much return you earn per year at each down payment level. Higher = better.</p>
               <div className="h-40 bg-white p-2 rounded border">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
@@ -194,7 +192,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                     <YAxis tickFormatter={(value: number) => `${value.toFixed(1)}%`} />
                     <Tooltip formatter={(value, name) => [
                       name === 'irr' ? `${Number(value).toFixed(2)}%` : value,
-                      name === 'irr' ? 'IRR' : 'Total Wealth'
+                      name === 'irr' ? 'Annual Return' : 'Total Profit'
                     ]} />
                     <Line type="monotone" dataKey="irr" stroke="#2563eb" strokeWidth={2} />
                   </LineChart>
@@ -204,7 +202,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
             
             <div>
               <h4 className="font-medium text-blue-900 mb-1">💰 Net Profit by Down Payment</h4>
-              <p className="text-xs text-gray-600 mb-2">Total profit (operations + sale) minus cash invested upfront (incl. points). Shows true return accounting for all upfront costs.</p>
+              <p className="text-xs text-gray-600 mb-2">Total profit (rental income + sale) minus your upfront cash investment.</p>
               <div className="h-40 bg-white p-2 rounded border">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
@@ -222,7 +220,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
           </div>
           
           <div>
-            <h4 className="font-medium text-blue-900 mb-2">📊 All Scenarios (Green = Recommended)</h4>
+            <h4 className="font-medium text-blue-900 mb-2">📊 All Down Payment Options (Green = Recommended)</h4>
             <div className="bg-white rounded border overflow-hidden">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50">
@@ -230,7 +228,7 @@ export const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                     <th className="p-2 text-left">Down Pmt</th>
                     <th className="p-2 text-right">Rate</th>
                     <th className="p-2 text-right">Points</th>
-                    <th className="p-2 text-right">IRR</th>
+                    <th className="p-2 text-right">Annual Return</th>
                     <th className="p-2 text-right">Cash Outlay</th>
                     <th className="p-2 text-right">Total Returns</th>
                     <th className="p-2 text-right">Net Profit</th>

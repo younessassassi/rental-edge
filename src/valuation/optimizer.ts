@@ -105,8 +105,8 @@ export function getOptimizationRecommendation(optimization: OptimizationResult):
   const downPaymentAmount = ((1 - bestLoanPercent) * purchasePrice).toLocaleString(undefined, { maximumFractionDigits: 0 });
   
   if (bestLoanPercent === 0) {
-    return `💡 Consider a cash purchase ($${downPaymentAmount} down) to increase IRR by ${irrImprovement}% and total wealth by $${wealthImprovement}`;
+    return `💡 Consider a cash purchase ($${downPaymentAmount} down) to increase your annual return by ${irrImprovement}% and total profit by $${wealthImprovement}`;
   } else {
-    return `💡 Consider ${loanPercentDisplay}% financing (${downPaymentDisplay}% down = $${downPaymentAmount}) to increase IRR by ${irrImprovement}% and total wealth by $${wealthImprovement}`;
+    return `💡 Consider ${loanPercentDisplay}% financing (${downPaymentDisplay}% down = $${downPaymentAmount}) to increase your annual return by ${irrImprovement}% and total profit by $${wealthImprovement}`;
   }
 }

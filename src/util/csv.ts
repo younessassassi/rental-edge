@@ -2,7 +2,7 @@ import { YearResultFinanced, YearResultBase } from '../valuation/engine';
 
 export function buildCsv(cash: YearResultBase[], fin: YearResultFinanced[]): string {
   const headers = [
-    'Year','Rent','Expenses','NOI Cash','NOI Fin','Depreciation','Taxable Cash','Taxable Fin','AfterTax CF Cash','AfterTax CF Fin','AfterTax CF Cash (No Dep)','AfterTax CF Fin (No Dep)','Depreciation Tax Shield Cash','Depreciation Tax Shield Fin','Loan Balance'
+    'Year','Rent','Expenses','Net Income (Cash)','Net Income (Loan)','Depreciation','Taxable (Cash)','Taxable (Loan)','Cash in Pocket (Cash)','Cash in Pocket (Loan)','Before Dep (Cash)','Before Dep (Loan)','Tax Savings (Cash)','Tax Savings (Loan)','Loan Balance'
   ];
   const rows = cash.map((c,i) => {
     const f = fin[i];

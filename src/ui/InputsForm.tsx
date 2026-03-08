@@ -25,6 +25,28 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
     </label>
   );
 
+  const pctInput = (label: string, k: keyof InputState, step = 0.1, min = 0, desc?: string) => (
+    <label className="flex flex-col gap-1 text-sm" key={k as string}>
+      <span className="font-medium">{label}</span>
+      {desc && <span className="text-xs text-gray-500 leading-tight">{desc}</span>}
+      <div className="flex items-center gap-1">
+        <input
+          type="number"
+          step={step}
+          min={min}
+          value={typeof value[k] === 'number' ? parseFloat(((value[k] as number) * 100).toFixed(4)) : ''}
+          onChange={(e) => {
+            const parsed = parseFloat(e.target.value);
+            const finalValue = isNaN(parsed) ? '' : Math.max(parsed, min) / 100;
+            update(k, finalValue as any);
+          }}
+          className="border rounded px-2 py-1 flex-1"
+        />
+        <span className="text-gray-400 text-sm">%</span>
+      </div>
+    </label>
+  );
+
   const textInput = (label: string, k: keyof InputState) => (
     <label className="flex flex-col gap-1 text-sm" key={k as string}>
       <span className="font-medium">{label}</span>
@@ -41,7 +63,7 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
   return (
     <div className="space-y-4">
       <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm text-blue-800">
-        <strong>How to use:</strong> Enter your property details and adjust any values to model your scenario.
+        <strong>How to use:</strong> Enter your property details below. Percentages are entered as whole numbers (e.g. enter 6.5 for 6.5%).
       </div>
       
       <div className="bg-white p-4 rounded shadow space-y-3">
@@ -54,25 +76,25 @@ export const InputsForm: React.FC<{ value: InputState; onChange(v: InputState): 
       </div>
 
       <div className="grid md:grid-cols-4 gap-4 bg-white p-4 rounded shadow">
-        {numInput('Purchase Price', 'purchasePrice', 1000, 0, 'Total price of the property. Sets the basis for loan amount, depreciation, and future sale gain.')}
-        {numInput('Closing Costs', 'closingCosts', 100, 0, 'One-time fees at purchase (title, escrow, etc.). Added to your upfront cash outlay, increasing the investment basis.')}
-        {numInput('Loan %', 'loanPercent', 0.01, 0, 'Portion of purchase price financed (e.g. 0.7 = 70% loan). Higher leverage reduces cash needed but increases debt service.')}
-        {numInput('Interest Rate', 'interestRate', 0.001, 0, 'Annual mortgage rate as a decimal (e.g. 0.065 = 6.5%). Drives monthly payment and total interest paid over the loan.')}
-        {numInput('Loan Term (yrs)', 'loanTermYears', 1, 1, 'Length of the mortgage. Longer terms lower monthly payments but increase total interest paid.')}
-        {numInput('Loan Points', 'loanPoints', 0.001, 0, 'Upfront fee as % of loan amount (e.g. 0.02 = 2 points). Added to cash outlay and amortized as a tax deduction over the loan term.')}
-        {numInput('Gross Annual Rent', 'grossAnnualRent', 100, 0, 'Total yearly rental income before any expenses. This is your top-line revenue driving NOI and cash flow.')}
-        {numInput('Rent Growth %', 'rentGrowth', 0.001, 0, 'Expected annual increase in rent as a decimal (e.g. 0.03 = 3%/yr). Compounds each year, boosting future cash flow.')}
-        {numInput('Taxes (annual)', 'taxes', 100, 0, 'Yearly property tax. Part of operating expenses, subtracted from rent to calculate NOI.')}
-        {numInput('Insurance (annual)', 'insurance', 50, 0, 'Yearly property insurance. Part of operating expenses, subtracted from rent to calculate NOI.')}
-        {numInput('HOA (annual)', 'hoa', 50, 0, 'Yearly homeowners association fees, if any. Part of operating expenses, subtracted from rent.')}
-        {numInput('Other Expenses (annual)', 'otherExpenses', 50, 0, 'Repairs, property management, vacancy, etc. Part of operating expenses that grow with expense growth rate.')}
-        {numInput('Expense Growth %', 'expenseGrowth', 0.001, 0, 'Annual increase in operating expenses as a decimal (e.g. 0.025 = 2.5%/yr). Compounds each year, reducing future NOI.')}
-        {numInput('Land %', 'landPercent', 0.01, 0, 'Portion of value that is land (e.g. 0.2 = 20%). Only the building portion (1 − land%) is depreciable over 27.5 years.')}
-        {numInput('Horizon (yrs)', 'horizonYears', 1, 1, 'How many years you plan to hold the property. Determines how many years of cash flow and the sale timing.')}
-        {numInput('Appreciation %', 'appreciation', 0.001, 0, 'Expected annual property value increase as a decimal (e.g. 0.035 = 3.5%/yr). Drives the future sale price.')}
-        {numInput('Selling Costs %', 'sellingCostsPercent', 0.001, 0, 'Costs to sell as % of sale price (e.g. 0.06 = 6% for agent fees, etc.). Subtracted from gross sale proceeds.')}
-        {numInput('Tax Rate %', 'taxRate', 0.001, 0, 'Marginal income tax rate as a decimal (e.g. 0.32 = 32%). Applied to taxable rental income and depreciation recapture at sale.')}
-        {numInput('Cap Gains Rate %', 'capGainsRate', 0.001, 0, 'Long-term capital gains rate as a decimal (e.g. 0.15 = 15%). Applied to the capital gain portion when you sell.')}
+        {numInput('Purchase Price', 'purchasePrice', 1000, 0, 'Total price of the property.')}
+        {numInput('Closing Costs', 'closingCosts', 100, 0, 'One-time fees at purchase (title, escrow, etc.).')}
+        {pctInput('Loan %', 'loanPercent', 1, 0, 'How much of the price you borrow. 70 means a 70% loan.')}
+        {pctInput('Interest Rate', 'interestRate', 0.1, 0, 'Your mortgage rate. Drives your monthly payment amount.')}
+        {numInput('Loan Term (yrs)', 'loanTermYears', 1, 1, 'Length of the mortgage in years.')}
+        {pctInput('Loan Points', 'loanPoints', 0.1, 0, 'Upfront fee to the lender. 1 point = 1% of the loan amount.')}
+        {numInput('Gross Annual Rent', 'grossAnnualRent', 100, 0, 'Total yearly rental income before any expenses.')}
+        {pctInput('Rent Growth', 'rentGrowth', 0.1, 0, 'How much rent goes up each year. 3 means 3% per year.')}
+        {numInput('Taxes (annual)', 'taxes', 100, 0, 'Yearly property tax.')}
+        {numInput('Insurance (annual)', 'insurance', 50, 0, 'Yearly insurance cost.')}
+        {numInput('HOA (annual)', 'hoa', 50, 0, 'Yearly HOA fees, if any.')}
+        {numInput('Other Expenses (annual)', 'otherExpenses', 50, 0, 'Repairs, property management, vacancy allowance, etc.')}
+        {pctInput('Expense Growth', 'expenseGrowth', 0.1, 0, 'How much expenses go up each year.')}
+        {pctInput('Land %', 'landPercent', 1, 0, 'Portion that is land. Only the building part gets a tax deduction.')}
+        {numInput('Hold Period (yrs)', 'horizonYears', 1, 1, 'How many years you plan to hold the property.')}
+        {pctInput('Appreciation', 'appreciation', 0.1, 0, 'How much the property goes up in value each year.')}
+        {pctInput('Selling Costs', 'sellingCostsPercent', 0.1, 0, 'Fees when you sell (agent commission, etc.) as % of sale price.')}
+        {pctInput('Tax Rate', 'taxRate', 0.1, 0, 'Your income tax bracket. Applied to rental income and parts of the sale.')}
+        {pctInput('Capital Gains Tax', 'capGainsRate', 0.1, 0, 'Tax on profit when you sell. Usually 15% or 20%.')}
       </div>
     </div>
   );
